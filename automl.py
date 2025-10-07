@@ -16,6 +16,14 @@ class SimpleGUI:
         self.root = tk.Tk()
         self.root.title("Gemini Chat")
         
+        # History field (scrollable)
+        self.history_text = tk.Text(self.root, height=15)
+        scrollbar = tk.Scrollbar(self.root)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.history_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.history_text.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=self.history_text.yview)
+        
         # Input field
         self.input_text = tk.Text(self.root, height=3)
         self.input_text.pack(pady=10)
@@ -24,17 +32,21 @@ class SimpleGUI:
         self.send_btn = tk.Button(self.root, text="Send", command=self.send_message)
         self.send_btn.pack()
         
-        # Response field
-        self.response_text = tk.Text(self.root, height=10)
-        self.response_text.pack(pady=10)
-        
     def send_message(self):
         user_input = self.input_text.get("1.0", tk.END).strip()
         if user_input:
+            # Add user message to history
+            self.history_text.insert(tk.END, f"You: {user_input}\n\n")
+            
+            # Get Gemini response
             response = self.model.generate_content(user_input)
-            self.response_text.delete("1.0", tk.END)
-            self.response_text.insert("1.0", response.text)
+            
+            # Add Gemini response to history
+            self.history_text.insert(tk.END, f"Gemini: {response.text}\n\n")
+            
+            # Clear input and scroll to bottom
             self.input_text.delete("1.0", tk.END)
+            self.history_text.see(tk.END)
     
     def run(self):
         self.root.mainloop()
