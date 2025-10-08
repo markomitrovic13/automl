@@ -55,18 +55,23 @@ class SimpleGUI:
             # Clear input and scroll to bottom
             self.input_text.delete("1.0", tk.END)
             self.history_text.see(tk.END)
-    
+
     def upload_csv(self):
-        file_path = filedialog.askopenfilename(
-            title="Select CSV file",
-            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
-        )
+        file_path = filedialog.askopenfilename() #Let the user select the file.
         if file_path:
             global data
-            data = pd.read_csv(file_path)
-            filename = os.path.basename(file_path)
-            self.history_text.insert(tk.END, f"You uploaded CSV: {filename}\n")
+            data = pd.read_csv(file_path, header = None) #Load the file data into a pandas df.
+            self.history_text.insert(tk.END, f"You uploaded CSV: {os.path.basename(file_path)}\n")
             self.history_text.see(tk.END)
+
+            header_query = "These are the first three rows of the csv file: " + data.iloc[:3].to_string() + \
+                            "Do you think the first row should be used as the header? Please respond with 'yes' or 'no'."
+            header_response = self.model.generate_content(header_query)
+            if header_response.text == "yes":
+                data.columns = data.iloc[0]
+                data = data.iloc[1:]
+            
+            print(data)
 
     
     def run(self):
