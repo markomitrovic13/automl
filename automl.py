@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+from tkinter import filedialog
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -28,9 +29,15 @@ class SimpleGUI:
         self.input_text = tk.Text(self.root, height=3)
         self.input_text.pack(pady=10)
         
-        # Send button
-        self.send_btn = tk.Button(self.root, text="Send", command=self.send_message)
-        self.send_btn.pack()
+        # Buttons
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(pady=5)
+        
+        self.send_btn = tk.Button(button_frame, text="Send", command=self.send_message)
+        self.send_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.upload_btn = tk.Button(button_frame, text="Upload CSV", command=self.upload_csv)
+        self.upload_btn.pack(side=tk.LEFT, padx=5)
         
     def send_message(self):
         user_input = self.input_text.get("1.0", tk.END).strip()
@@ -46,6 +53,16 @@ class SimpleGUI:
             
             # Clear input and scroll to bottom
             self.input_text.delete("1.0", tk.END)
+            self.history_text.see(tk.END)
+    
+    def upload_csv(self):
+        file_path = filedialog.askopenfilename(
+            title="Select CSV file",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
+        )
+        if file_path:
+            filename = os.path.basename(file_path)
+            self.history_text.insert(tk.END, f"You uploaded CSV: {filename}\n\n")
             self.history_text.see(tk.END)
     
     def run(self):
