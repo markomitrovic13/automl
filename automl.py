@@ -1,6 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
+import pandas as pd
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -61,9 +62,12 @@ class SimpleGUI:
             filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
         )
         if file_path:
+            global data
+            data = pd.read_csv(file_path)
             filename = os.path.basename(file_path)
-            self.history_text.insert(tk.END, f"You uploaded CSV: {filename}\n\n")
+            self.history_text.insert(tk.END, f"You uploaded CSV: {filename}\n")
             self.history_text.see(tk.END)
+
     
     def run(self):
         self.root.mainloop()
