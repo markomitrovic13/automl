@@ -1,4 +1,5 @@
 import os
+from re import I
 import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
@@ -64,14 +65,26 @@ class SimpleGUI:
             self.history_text.insert(tk.END, f"You uploaded CSV: {os.path.basename(file_path)}\n")
             self.history_text.see(tk.END)
 
+            #Ask if the first row should be used as the header.
             header_query = "These are the first three rows of the csv file: " + data.iloc[:3].to_string() + \
                             "Do you think the first row should be used as the header? Please respond with 'yes' or 'no'."
             header_response = self.model.generate_content(header_query)
             if header_response.text == "yes":
                 data.columns = data.iloc[0]
                 data = data.iloc[1:]
+
+            #Try to figure out which column is the label.
+            label_query = "These are the given columns: " + data.columns.to_string() + \
+                          "Which column do you think is the label? Please respond with the column name. \
+                            If there isn't one that is obviously the column, please just use the last column."
+            label_response = self.model.generate_content(label_query)
+            self.label_column = label_response.text
+
+            train_X = data.drop(columns=[self.label_column]).to_numpy()
+            train_y = data[self.label_column].to_numpy()
+
             
-            print(data)
+            
 
     
     def run(self):
